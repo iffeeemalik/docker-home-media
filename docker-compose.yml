@@ -1,0 +1,123 @@
+version: '3.8'
+services:
+  nginx-proxy-manager:
+    container_name: nginx-proxy-manager
+    hostname: nginx-proxy-manager
+    image: jlesage/nginx-proxy-manager:latest
+    ports:
+      - 80:80
+      - 443:443
+      - 81:81
+    restart: unless-stopped
+    environment:
+      DBUS_SYSTEM_BUS_ADDRESS: "unix:path=/host/run/dbus/system_bus_socket"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${docker_path}/nginx-proxy-manager:/config
+
+  sonarr:
+    container_name: sonarr
+    image: linuxserver/sonarr:latest
+    restart: unless-stopped
+    hostname: sonarr
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: "Asia/Riyadh"
+      UMASK_SET: 022
+    volumes:
+      - ${docker_path}/sonarr:/config
+      - ${media_path}/TV_Shows:/tv
+
+  radarr:
+    container_name: radarr
+    image: linuxserver/radarr:latest
+    restart: unless-stopped
+    hostname: radarr
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: "Asia/Riyadh"
+      UMASK_SET: 022
+    volumes:
+      - ${docker_path}/radarr:/config
+      - ${media_path}/Movies:/movies
+
+  plex:
+    container_name: plex
+    image: plexinc/pms-docker:latest
+    restart: unless-stopped
+    hostname: plex
+    environment:
+      TZ: "Asia/Riyadh"
+      PLEX_CLAIM: "CLAIM-VALUE"
+    ports:
+      - 32400:32400/tcp
+      - 3005:3005/tcp
+      - 8324:8324/tcp
+      - 32469:32469/tcp
+      - 1900:1900/udp
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
+    volumes:
+      - ${docker_path}/plex:/config
+      - ${media_path}:/data
+
+  jackett:
+    container_name: jackett
+    image: linuxserver/jackett:latest
+    restart: unless-stopped
+    hostname: jackett
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: "Asia/Riyadh"
+    volumes:
+      - ${docker_path}/jackett:/config
+
+  prowlarr:
+    container_name: prowlarr
+    image: prowlarr/prowlarr:latest
+    restart: unless-stopped
+    hostname: prowlarr
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: "Asia/Riyadh"
+    volumes:
+      - ${docker_path}/prowlarr:/config
+
+  overseerr:
+    container_name: overseerr
+    image: overseerr/overseerr:latest
+    restart: unless-stopped
+    hostname: overseerr
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: "Asia/Riyadh"
+      BASE_URL: "http://localhost:5055"
+    volumes:
+      - ${media_path}:/data
+      - ${docker_path}/overseerr:/config
+
+  qbittorrent:
+    container_name: qbittorrent
+    image: linuxserver/qbittorrent:latest
+    restart: unless-stopped
+    hostname: qbittorrent
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: "Asia/Riyadh"
+    volumes:
+      - ${docker_path}/qbittorrent:/config
+      - ${docker_path}/downloads:/downloads
+      - ${media_path}:/watch
+
+networks:
+  home-network:
+    external:
+      name: home-network
